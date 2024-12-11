@@ -34,7 +34,6 @@
   import { useStore } from '../store/Storage';
   import ButtonComponent from '../components/ButtonComponent.vue';
   import InputField from '../components/InputField.vue';
-import { errorMessages } from "vue/compiler-sfc";
   
 
   export default defineComponent({
@@ -74,7 +73,8 @@ import { errorMessages } from "vue/compiler-sfc";
         }
         
         try {  
-          await authStore.performLogin(email.value, password.value);        
+          await authStore.performLogin(email.value, password.value);
+                  
           router.push({ name: 'Dashboard' });                    
           
         } catch (error) {

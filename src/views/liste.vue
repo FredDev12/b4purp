@@ -4,9 +4,9 @@
       <NavBar :menuItems="filteredMenuItems" />
   
       <!-- Contenu principal -->
-      <main class="client-container">
+      <main class="table-container">
         <h1>Liste des Utilisateurs</h1>
-        <ButtonComponent @click="addUser()">Ajouter</ButtonComponent>
+        <button class="add-button" @click="addUser()">Ajouter</button>
         <table v-if="entities.length > 0" class="client-table">
           <thead>
             <tr>

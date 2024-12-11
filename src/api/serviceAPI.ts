@@ -22,6 +22,7 @@ export const apiClientProtected = axios.create({
     timeout: 10000
 });
 
+
 // Ajouter un intercepteur pour inclure automatiquement le token JWT
 apiClient.interceptors.request.use(
     (config) => {
@@ -68,7 +69,7 @@ export const register = async (Data:FormData) => {
 export const login = async (email: string, password: string ) =>  {
     try {
         const response = await apiClient.post('/login', {email, password});
-        console.log(response.data);
+        console.log("login response :",response.data);
         return response.data;
     } catch (error) {
         handleError(error);

@@ -47,7 +47,7 @@
 
               
 
-              <ImageUpload @update:file="handleFile" required />
+                  <input type="file" @change="onFileChange">
           </div>
 
           <ButtonComponent
@@ -108,7 +108,7 @@ export default defineComponent({
           email: '',
           password: '',
           confirmPassword: '',
-          file: null as File | null,
+          photo: null as File | null,
           role: '',
           managerId: '',
           clientId: '',
@@ -121,9 +121,12 @@ export default defineComponent({
       const clientOptions = ref<{ value: string; label: string }[]>([]);
       
 
-      const handleFile = (file: File) => {
-          form.file = file;
-      };
+      function onFileChange(event: Event) {
+      const target = event.target as HTMLInputElement;
+      if (target.files) {
+        form.photo = target.files[0];
+      }
+    }
       
 
       const emailError = ref("");
@@ -179,6 +182,20 @@ export default defineComponent({
 
           
           const payload = { ...form, userType: userType.value };
+
+          const data = new FormData();
+      data.append('name', form.name);
+      data.append('email', form.email);
+      data.append('password', form.password);
+      data.append('role', form.role);
+      data.append('managerId', form.managerId);
+      data.append('clientId', form.clientId);
+      data.append('utilisateurId', form.utilisateurId);
+      data.append('task', form.task);
+      data.append('etat', form.etat);
+      if (form.photo) {
+        data.append('photo', form.photo);
+      }
           try {
               //const response = await store.addUser(payload);
               //console.log('Registration successful:', response);
@@ -186,7 +203,7 @@ export default defineComponent({
               
               console.log(form);
               
-              await register(form);
+              await register(data);
               //router.push('/dashboard');
           } catch (error) {
             console.error('Registration failed:', error);
@@ -199,7 +216,7 @@ export default defineComponent({
       
       return {
           handleRegister, form, filteredMenuItems,
-          emailError,  handleFile, role,
+          emailError,  onFileChange, role,
           passwordError, apiError, userType,
           loading, managerOptions, clientOptions,
           

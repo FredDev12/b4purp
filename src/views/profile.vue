@@ -1,45 +1,26 @@
 <template>
     <NavBar :menuItems="filteredMenuItems" />
     
-    <div v-if="isAuthenticated" class="profile">
-      <!-- Barre latérale 
-            <img v-if="imageUrl || defaultImage" :src="imageUrl || defaultImage" alt="Profile Image" class="profile-image"/>-->
+    <div v-if="isAuthenticated" class="profile-container">
+      <main>
+        <img v-if="imageUrl || defaultImage" src="../assets/user.png" alt="Profile Image" class="profile-image"/>
+        <button class="btn" @change="changePicture">changer la photo</button>
+              
+        <h1>Profil de l'utilisateur</h1>
+        <p> <strong>Nom :</strong> {{ form.name }}</p>
+        <p> <strong>Email :</strong> {{ form.email }}</p>
+        <p > <strong>Role :</strong> {{ form.role }}</p>
 
-      
-        <!-- Contenu principal -->
-      <main class="profile-container">        
-          
-          <!-- Ajouter les sections spécifiques -->
-          <form class="profile-form" @submit.prevent="updateProfile">
-            <img v-if="imageUrl || defaultImage" src="../assets/user.png" alt="Profile Image" class="profile-image"/>
-            
-            <button class="btn" @change="changePicture">changer la photo</button>
-          
-            <div class="form-group">
-                <InputField id="name" label="Nom" v-model="form.name" type="text" placeholder="Nom" disabled required />
+        <ButtonComponent
+            type="submit"
+            class="btn-primary"
+            :disabled="loading"
+        >
+            <template v-if="loading">Chargement...</template>
+            <template v-else>Update</template>
+        </ButtonComponent>
 
-                <InputField id="email" label="Email" v-model="form.email" type="email" placeholder="Votre email" :error-message="emailError" disabled required />
-
-                <InputField id="password" label="Mot de passe" v-model="form.password" type="password" placeholder="Votre mot de passe" :error-message="passwordError" disabled required />
-
-                <InputField id="confirmpassword" label="Confirmez le mot de passe" v-model="form.confirmPassword" type="password" placeholder="Confirmez votre mot de passe" disabled required />
-
-                <InputField id="role" label="role" v-model="form.role" type="text" placeholder="Votre role" disabled required />
-
-            </div>
-
-            <ButtonComponent
-                type="submit"
-                class="btn-primary"
-                :disabled="loading"
-            >
-                <template v-if="loading">Chargement...</template>
-                <template v-else>Update</template>
-            </ButtonComponent>
-
-            <p v-if="apiError" class="error">{{ apiError }}</p>
-        </form>
-        
+        <p v-if="apiError" class="error">{{ apiError }}</p>
         
       </main>
     </div>
@@ -60,7 +41,6 @@ import ImageUpload from '../components/ImageUpload.vue';
   import { useRouter } from 'vue-router';
   import { useStore } from '../store/Storage';
   import { photo, getUserProfile } from '../api/serviceAPI';
-import { c } from 'vite/dist/node/types.d-aGj9QkWt';
   
   
   

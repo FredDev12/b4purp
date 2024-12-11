@@ -8,9 +8,9 @@ interface User {
   email: string;
   password: string;  // Assurez-vous que le mot de passe n'est pas exposé inutilement
   role: string;
-  clientId: string[];
+  clientId: number[];
   managerId: number[];
-  utilisateurId: string[];
+  utilisateurId: number[];
   contracts: Contract[] | null;
   task: string;
   status: string;

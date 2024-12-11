@@ -1,11 +1,11 @@
 <template>
-    <div v-if="isAuthenticated" class="dashboard">
+    <div  class="dashboard">
       <NavBar :menuItems="filteredMenuItems" />
   
       <!-- Contenu principal -->
       <main class="dashboard-container">
         <div>
-          <h1>Bienvenue sur le tableau de bord, {{ name }} ({{ role }}) !</h1>
+          <h1>bonjour, {{ name }} !</h1>
         </div>
         <section class="user-profile">
         <h2>Profil Utilisateur</h2>
@@ -25,7 +25,7 @@
               </tr>              
             </td>
             <td>              
-              <tr v-for="contract in store.userProfile!.contracts" :key="contract.id">
+              <tr v-for="contract in userContract" :key="contract.id">
                 <td>{{ contract.description || 'Pas de description' }}</td>
               </tr>              
             </td>           
@@ -45,8 +45,9 @@
           <tr v-for="client in clientList" :key="client.id">
             <td>{{ client.name }}</td>            
             <td>              
-              <tr v-for="contract in client.contracts" :key="contract.id">
+              <tr v-for="contract in contractForManager" :key="contract.id">
                 <td>{{ contract.name || 'Pas de contrat' }}</td>
+                
               </tr>              
             </td>
             <td>
@@ -72,8 +73,8 @@
                 <td>
                   {{ contract.name || 'Pas de contrat'}}
                   <!-- Action buttons for each contract -->
-                  <button @click="editContract(contract.id)" class="edit-button">Éditer</button>
-                  <button @click="deleteContract(contract.id)" class="delete-button">Supprimer</button>
+                  <button @click="editContract(contract.id)"  v-if="role !== 'Utilisateur'" class="edit-button">Éditer</button>
+                  <button @click="deleteContract(contract.id)" v-if="role !== 'Utilisateur'" class="delete-button">Supprimer</button>
                 </td>
               </tr>              
             </td>            
@@ -96,7 +97,7 @@
           <tr v-for="user in utilisateurList" :key="user.id">
             <td>{{ user.name }}</td>
             <td>
-              {{ store.users!.find(manager =>  user.managerId.includes(manager.id)) ? store.users!.find(manager => user.managerId.includes(manager.id))!.name : 'Manager Inconnu' }}
+              {{ store.users!.find(manager =>  user.managerId!.includes(manager.id)) ? store.users!.find(manager => user.managerId.includes(manager.id))!.name : 'Manager Inconnu' }}
             </td>
             <td>
               <tr v-for="contract in user.contracts" :key="contract.id">
@@ -114,9 +115,7 @@
       </section>
       </main>
     </div>
-    <div v-else class="dashboard">
-      <p>Veuillez vous connecter pour accéder à cette page.</p>
-    </div>
+    
   </template>
   
   <script lang="ts">
@@ -166,6 +165,9 @@
       let utilisateurList;
 
       
+      let contractForManager;
+
+      
 
 
       const userContract = store.userProfile!.contracts!.map(contract => ({
@@ -200,15 +202,70 @@
           managerList = store.users!.filter(user => user.role === 'Manager');
           utilisateurList = store.users!.filter(user => user.role === 'Utilisateur');
 
+        
+          // Parcourir les clients
+          clientList.forEach(clientItem => {
+            if (clientItem.contracts) {
+              const listConctractInClient = clientItem.contracts; // Liste des contrats du client
+
+              console.log('\n\n Liste des contrats du client :', listConctractInClient, '\n\n');
+
+              // Vérifier quels contrats dans listConctractInClient correspondent à userContract
+              const matchingContracts = listConctractInClient.filter(clientContract =>
+                userContract.some(userC => userC.id === clientContract.id) // Comparaison par ID
+              );
+
+              // Afficher les contrats correspondants
+              if (matchingContracts.length > 0) {
+                console.log('\n\n Contrats correspondants pour ce client :');
+                contractForManager = matchingContracts;
+                console.log('\n\n list liste',contractForManager,'\n\n');
+              } else {
+                console.log('\n\n Aucun contrat correspondant trouvé pour ce client.');
+              }
+            }
+          });
+
+          let managerID: number[] =[];
+          let utilID: number[] =[];
+          let managerForUser;
+          
+
+          utilisateurList.forEach(manager =>{
+            
+            if (manager.managerId) {
+              
+              // Vérifier quels manager dans utilisateurList correspondent à managerList
+              const liste = manager.managerId;
+              
+              managerID = managerID.concat(manager.managerId);
+              utilID = utilID.concat(manager.id);
+
+              
+            }
+          })
+          
+
+          
+
+          
+
+            
+
+
+
       } else {
           console.error('store.users is undefined');
           // Optionally initialize or fetch users
       }
 
-      console.log('\n\n\n\n', userContract, '\n\n\n');
-      console.log('\n\n\n\n client', clientList, '\n\n\n');
-      console.log('\n\n\n\n', store.users!, '\n\n\n');
+      console.log('\n\n user actif ', userContract, '\n\n');      
+      console.log('\n\n client', clientList, '\n\n');
+      console.log('\n\n Manager', managerList, '\n\n');
+      console.log('\n\n utilisateur',utilisateurList, '\n\n');
       //console.log('\n\n\n\n', userContract, '\n\n\n');
+
+
       
   
       // Définir les menus spécifiques à chaque rôle
@@ -339,7 +396,7 @@
   
       return {
         name, role, menuItems, filteredMenuItems,utilisateurList,userContract,
-        entities, entityTitle, editEntity,
+        entities, entityTitle, editEntity,contractForManager,
         deleteEntity, editContract,deleteContract, isAuthenticated,
         logout, clientList, managerList,store
       };
