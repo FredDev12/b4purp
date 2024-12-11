@@ -10,14 +10,14 @@
   </button>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent, PropType } from 'vue';
 
 export default defineComponent({
   name: 'Button',
   props: {
     type: {
-      type: String as PropType<'button' | 'submit' | 'reset'>,
+      type: String ,
       required: false,
       default: 'button',
     },
@@ -29,7 +29,7 @@ export default defineComponent({
   },
   emits: ['click'],
   methods: {
-    onClick(event: Event) {
+    onClick(event) {
       if (!this.disabled) {
         this.$emit('click', event);
       }

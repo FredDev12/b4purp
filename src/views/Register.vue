@@ -34,7 +34,7 @@
     </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { register } from '../api/serviceAPI';
@@ -72,7 +72,7 @@ export default defineComponent({
             email: '',
             password: '',
             confirmPassword: '',
-            file: null as File | null,
+            photo: File | null,
             role: ''
         });
 
@@ -81,8 +81,8 @@ export default defineComponent({
             { value: 'Utilisateur', label: 'Utilisateur' },
         ]);
 
-        const handleFile = (file: File) => {
-            form.file = file;
+        const handleFile = (file) => {
+            form.photo = file;
         };
         
 
@@ -92,10 +92,10 @@ export default defineComponent({
         const loading = ref(false);  
         
         const menuItems = ref([
-            { name: 'Tableau de Bord', link: '/dashboard', active: false, visibleTo: ['Admin', 'Client', 'Manager', 'Utilisateur'] },
-            { name: 'Liste des Utilisateurs', link: '/liste', active: false, visibleTo: ['Admin', 'Client', 'Manager'] },
-            { name: "Mon Profil", link: '/profile', active: true, visibleTo: ['Admin', 'Client', 'Manager', 'Utilisateur'] },
-        ]);
+          { name: 'Tableau de Bord', link: '/dashboard', active: false, visibleTo: ['Admin', 'Client', 'Manager', 'Utilisateur'] },
+          { name: 'Liste des Utilisateurs', link: '/liste', active: false, visibleTo: ['Admin', 'Client', 'Manager'] },
+          { name: 'Liste des contract', link: '/contract', active: true, visibleTo: ['Admin', 'Client'] },
+      ]);
 
         // Filtrer les éléments du menu en fonction du rôle de l'utilisateur
         const filteredMenuItems = menuItems.value.filter(item => item.visibleTo.includes(role.value));
@@ -104,7 +104,7 @@ export default defineComponent({
 
         const handleRegister = async () => {
             
-            console.log(form.file);
+            console.log(form.photo);
             
             
             loading.value = true;
@@ -145,7 +145,7 @@ export default defineComponent({
             }
         };
 
-        const validateEmail = (email: string): boolean => {
+        const validateEmail = (email) => {
             const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             return re.test(email.trim());
         };

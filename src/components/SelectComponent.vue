@@ -13,7 +13,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent, PropType, computed } from "vue";
 
 export default defineComponent({
@@ -24,7 +24,7 @@ export default defineComponent({
       required: false,
     },
     options: {
-      type: Array as PropType<Array<{ value: string; label: string }>>,
+      type: Array,
       required: true,
     },
     label: {

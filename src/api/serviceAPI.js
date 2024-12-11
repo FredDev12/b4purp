@@ -22,6 +22,12 @@ export const apiClientProtected = axios.create({
     timeout: 10000
 });
 
+export const apiClientProtected2 = axios.create({
+    baseURL: API_URL_PROTECTED,
+    headers: { 'Content-Type': 'application/json', },
+    timeout: 10000
+});
+
 
 // Ajouter un intercepteur pour inclure automatiquement le token JWT
 apiClient.interceptors.request.use(
@@ -47,14 +53,14 @@ apiClientProtected.interceptors.request.use(
 );
 
 // Fonction pour gérer les erreurs (sans opérateur optionnel)
-const handleError = (error: any) => {
+const handleError = (error) => {
     const errorMessage = error.response && error.response.data ? error.response.data : error.message;
     console.error('Erreur API :', errorMessage);
     throw errorMessage;
 };
 
 // Service d'inscription
-export const register = async (Data:FormData) => {
+export const register = async (Data) => {
     try {
         console.log(Data); // Affiche le fichier dans les logs
         
@@ -65,8 +71,19 @@ export const register = async (Data:FormData) => {
     }
 };
 
+export const registerContract = async (Data) => {
+    try {
+        console.log(Data); // Affiche le fichier dans les logs
+        
+        const response = await apiClientProtected.post('/registerContract', Data);
+        return response.data;
+    } catch (error) {
+        handleError(error);
+    }
+};
+
 // Service de connexion
-export const login = async (email: string, password: string ) =>  {
+export const login = async (email, password ) =>  {
     try {
         const response = await apiClient.post('/login', {email, password});
         console.log("login response :",response.data);
@@ -77,7 +94,7 @@ export const login = async (email: string, password: string ) =>  {
 };
 
 // Déconnexion
-export const logoutUser = async (token: string) => {
+export const logoutUser = async (token) => {
     try {
         const response = await apiClient.post('/logout', {}, {
             headers:{
@@ -90,7 +107,7 @@ export const logoutUser = async (token: string) => {
     }
 };
 
-export const getUserProfile = async (token: string) => {
+export const getUserProfile = async (token ) => {
     try {
         
         const response = await apiClientProtected.get('/user/profile', {
@@ -108,7 +125,7 @@ export const getUserProfile = async (token: string) => {
 };
 
 // Méthode : demander un lien de réinitialisation de mot de passe
-export const requestPasswordReset = async (email: string): Promise<void> => {
+export const requestPasswordReset = async (email) => {
     try {
         const response = await apiClient.post("/request-password-reset", { email });
         return response.data;
@@ -124,7 +141,7 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
 };
 
 // Méthode : réinitialiser le mot de passe avec un token
-export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
+export const resetPassword = async (token , newPassword )  => {
     try {
         const response = await apiClient.post("/reset-password", {
             token,
@@ -143,7 +160,7 @@ export const resetPassword = async (token: string, newPassword: string): Promise
     
 };
 
-export const photo = async(formData: FormData): Promise<any> => {
+export const photo = async(formData) => {
     try {
         const response = await apiClientProtected.post("/upload", formData);
         return response.data;
@@ -163,7 +180,7 @@ export const photo = async(formData: FormData): Promise<any> => {
 
 // Liste des utilisateurs (protégée)
 
-export const listUsers = async (role: string, token: string ) => {
+export const listUsers = async (role , token  ) => {
     try {
         const response = await apiClientProtected.get("/users",{
             params:{
@@ -179,7 +196,7 @@ export const listUsers = async (role: string, token: string ) => {
     }
 };
 
-export const getUsers = async (role: string, token: string ) => {
+export const getUsers = async (role , token  ) => {
     try {
         const response = await apiClientProtected.get("/listusers",{
             params:{
@@ -195,12 +212,16 @@ export const getUsers = async (role: string, token: string ) => {
     }
 };
 
-export const getContract = async () => {
+export const getContract = async (role , token) => {
     try {
-        // Passez `userId` comme paramètre dans l'URL ou via `params`
-        const response = await apiClient.get(`${API_URL_PROTECTED}/contract`);
-        console.log('api : ',response);
-        
+        const response = await apiClientProtected.get("/listContract",{
+            params:{
+                role: role
+            },
+            headers:{
+                Authorization : `Bearer ${token}`
+            }
+        });        
         return response.data;
     } catch (error) {
         handleError(error); // Fonction pour gérer les erreurs
@@ -212,7 +233,7 @@ export const getContract = async () => {
 
 
 
-export const updateUserProfile = async (data: any, token: string) => {
+export const updateUserProfile = async (data, token ) => {
     try {
         
         const response = await apiClient.put(`${API_URL_PROTECTED}/user/profile`,data, {
@@ -233,7 +254,7 @@ export const updateUserProfile = async (data: any, token: string) => {
 
 //-----------------------------------------------------------
 // cree des utilisateurs (protégée)
-export const creatUsers = async (Data:{}) => {
+export const creatUsers = async (Data) => {
     try {
         const response = await apiClient.post(`${API_URL_PROTECTED}/user`, Data);        
         return response.data;
@@ -244,7 +265,7 @@ export const creatUsers = async (Data:{}) => {
 
 //-----------------------------------------------------------
 // update des utilisateurs (protégée)
-export const updateClient = async (id: string | number) => {
+export const updateClient = async (id) => {
     try {
         const response = await apiClient.put(`${API_URL_PROTECTED}/client/${id}`);        
         return response.data;
@@ -252,57 +273,85 @@ export const updateClient = async (id: string | number) => {
         handleError(error);
     }
 };
-export const updateManager = async (id: string | number) => {
-    try {
-        const response = await apiClient.put(`${API_URL_PROTECTED}/manager/${id}`);        
-        return response.data;
-    } catch (error) {
-        handleError(error);
-    }
-};
-export const updateUsers = async (id: string | number) => {
-    try {
-        const response = await apiClient.put(`${API_URL_PROTECTED}/users/${id}`);        
-        return response.data;
-    } catch (error) {
-        handleError(error);
-    }
-};
 
+export const updateUsers = async (id, data) => {
+    try {
+        if (!id || isNaN(Number(id))) {
+            console.error("ID Contract invalide :", id);
+            throw new Error("ID Contract invalide. Veuillez fournir un entier valide.");
+        }
+        
+        const response = await apiClientProtected2.put("/users",data,{
+            params:{
+                id: Number(id)
+            }
+        });       
+        return response.data;
+    } catch (error) {
+        handleError(error);
+    }
+};
+export const updateContract = async (id, data) => {
+    try {
+        if (!id || isNaN(Number(id))) {
+            console.error("ID Contract invalide :", id);
+            throw new Error("ID Contract invalide. Veuillez fournir un entier valide.");
+        }
+        console.log(data);
+        
+        
+        const response = await apiClientProtected2.put("/contract",data,{
+            params:{
+                id: Number(id)
+            }
+        });      
+        return response.data;
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du contrat :", error);
+        handleError(error);
+    }
+};
 
 //-----------------------------------------------------------
 // supprimer des utilisateurs (protégée)
-export const deleteClient = async (id: string | number) => {
+export const deleteUser = async (id) => {
     try {
-        const response = await apiClient.delete(`${API_URL_PROTECTED}/client/${id}`);        
+        if (!id || isNaN(Number(id))) {
+            console.error("ID Contract invalide :", id);
+            throw new Error("ID Contract invalide. Veuillez fournir un entier valide.");
+        }
+        const response = await apiClientProtected.delete("/users",{
+            params:{
+                id: Number(id)
+            }
+        });        
         return response.data;
     } catch (error) {
         handleError(error);
     }
 };
-export const deleteManager = async (id: string | number) => {
+export const deleteContractId = async (id) => {
     try {
-        const response = await apiClient.delete(`${API_URL_PROTECTED}/manager/${id}`);        
+        if (!id || isNaN(Number(id))) {
+            console.error("ID Contract invalide :", id);
+            throw new Error("ID Contract invalide. Veuillez fournir un entier valide.");
+        }
+        
+        const response = await apiClientProtected.delete("/contract",{
+            params:{
+                id: Number(id)
+            }
+        });        
         return response.data;
     } catch (error) {
         handleError(error);
     }
 };
-export const deleteUsers = async (id: string | number) => {
-    try {
-        const response = await apiClient.delete(`${API_URL_PROTECTED}/users/${id}`);        
-        return response.data;
-    } catch (error) {
-        handleError(error);
-    }
-};
+
 //-----------------------------------------------------------
 
 // Mettre à jour le profil
-export const updateProfile = async (
-    data: { username: string; email: string; password?: string },
-    id: string
-) => {
+export const updateProfile = async (data, id ) => {
     try {
         const response = await apiClient.put(`${API_URL_PROTECTED}/users/${id}`, data);
         return response.data;
@@ -311,14 +360,6 @@ export const updateProfile = async (
     }
 };
 
-// Delete a user by ID
-export const deleteUser = async (id: string): Promise<void> => {
-    try {
-        const response = await apiClient.delete(`${API_URL_PROTECTED}/users/${id}`);
-        return response.data;
-    } catch (error) {
-        handleError(error);
-    }
-};
+
 
 

@@ -29,7 +29,7 @@
     </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from 'vue';
 import { requestPasswordReset } from '../api/serviceAPI';
 import ButtonComponent from '../components/ButtonComponent.vue';
@@ -45,9 +45,9 @@ export default defineComponent({
     data() {
         return {
             email: "",
-            emailError: null as string | null,
-            apiError: null as string | null,
-            successMessage: null as string | null,
+            emailError: '',
+            apiError: '',
+            successMessage: '',
             loading: false,
         };
     },
@@ -80,7 +80,7 @@ export default defineComponent({
                 this.loading = false;
             }
         },
-        validateEmail(email: string) {
+        validateEmail(email) {
             const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             return re.test(email);
         },

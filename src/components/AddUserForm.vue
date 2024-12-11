@@ -93,7 +93,7 @@
     </div>
   </template>
   
-  <script lang="ts">
+  <script>
 import { defineComponent, reactive, ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { creatUsers } from '../api/serviceAPI';
@@ -112,8 +112,8 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const currentUserId = ref<number | null>(localStorage.getItem("id") ? parseInt(localStorage.getItem("id")!) : null);
-    const currentUserRole = ref<string | null>(localStorage.getItem("role") ? localStorage.getItem("role") : null);   
+    const currentUserId = ref(localStorage.getItem("id") ? parseInt(localStorage.getItem("id")) : null);
+    const currentUserRole = ref(localStorage.getItem("role") ? localStorage.getItem("role") : null);   
    
 
     const form = reactive({
@@ -125,7 +125,7 @@ export default defineComponent({
       phoneNumber: '',
       gender: '',
       address: '',
-      file: null as File | null,
+      file: File | null,
       role: '',
       createdBy: currentUserId.value, // Associer l'ID utilisateur
     });
@@ -162,11 +162,11 @@ export default defineComponent({
     const apiError = ref("");
     const loading = ref(false);
 
-    const handleFile = (file: File) => {
+    const handleFile = (file) => {
       form.file = file;
     };
 
-    const validateEmail = (email: string): boolean => {
+    const validateEmail = (email) => {
       const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;
       return re.test(email.trim());
     };

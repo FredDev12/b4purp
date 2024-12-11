@@ -26,6 +26,7 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('../views/dashboard.vue'), // Assurez-vous d'avoir une page d'accueil
+    meta : {title : 'Dashboard'}
   },
   
   
@@ -35,6 +36,12 @@ const routes = [
     path: "/liste",
     name: "liste",
     component: () => import("../views/liste.vue"),
+  },
+
+  {
+    path: "/contract",
+    name: "contract",
+    component: () => import("../views/contract.vue"),
   },
  
   {
@@ -46,6 +53,12 @@ const routes = [
     path: "/addUser",
     name: "addUser",
     component: () => import("../views/EntityManagement.vue"),
+  },
+
+  {
+    path: "/addContract",
+    name: "addContract",
+    component: () => import("../views/AddContract.vue"),
   },
   //----------------------------------------------------------------
   
@@ -66,6 +79,10 @@ router.beforeEach((to, _, next) => {
   } else {
     next();
   }
+});
+
+router.afterEach((to) => {
+  document.title = to.meta.title || 'Titre par défaut';
 });
 
 export default router;

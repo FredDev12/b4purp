@@ -9,14 +9,14 @@
       :disabled="disabled"
       :maxlength="maxlength"
       :minlength="minlength"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      @input="$emit('update:modelValue', ($event.target).value)"
       class="input"
     />
     <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from 'vue';
 
 export default defineComponent({

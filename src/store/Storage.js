@@ -1,73 +1,44 @@
 // src/store/authStore.ts
 import { defineStore } from 'pinia';
-import { login, register, getUserProfile, logoutUser, listUsers, getUsers } from '../api/serviceAPI';
+import { login, register, getUserProfile, logoutUser, listUsers, getUsers, getContract } from '../api/serviceAPI';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  password: string;  // Assurez-vous que le mot de passe n'est pas exposé inutilement
-  role: string;
-  clientId: number[];
-  managerId: number[];
-  utilisateurId: number[];
-  contracts: Contract[] | null;
-  task: string;
-  status: string;
-  profilePictureUrl?: string;  // URL de la photo de profil
-}
-
-interface Contract {
-  id: number;
-  name: string;
-  description: string;
-  userId: number;
-}
-
-
-interface State {
-  token: string | null;
-  userProfile: User | null;
-  users: User[];
-  userList: User[];
-  listClients: User[];
-  listManagers: User[];
-  listUtilisateurs: User[];
-  isAuthenticated: boolean;
-}
 
 export const useStore = defineStore({
   id: 'auth',
-  state: (): State => ({
+  state: () => ({
     token: localStorage.getItem('token') || null,
     userProfile: null,
     users: [],
     userList:[],
+    listContract: [],
     listClients: [],
     listManagers: [],
     listUtilisateurs: [],
     isAuthenticated: !!localStorage.getItem('token'),
   }),
   actions: {
-    async performLogin(email: string, password: string) {
+    async performLogin(email, password) {
       try {
         const response = await login(email, password);
         const token = response.token
         const role = response.role
+        const userId = response.id
         this.token = token;
         localStorage.setItem('token', token);
         localStorage.setItem('role', role);
+        localStorage.setItem('id', userId);
         this.isAuthenticated = true;
         // Fetch user profile upon successful login
         await this.fetchUserProfile(token);
         await this.fetchUsers(role ,token);
+        await this.fetchContract(role, token);
       } catch (error) {
         console.error('Authentication failed:', error);
         throw new Error('Login failed');
       }
     },
 
-    async fetchUserProfile(token:string) {
+    async fetchUserProfile(token) {
       if (!token) {
         console.error('No token provided');
         return;
@@ -82,7 +53,7 @@ export const useStore = defineStore({
       }
     },
 
-    async fetchUsers(role: string, token: string){
+    async fetchUsers(role, token){
       if (!token) {
         console.error('No token provided');
         return;
@@ -95,7 +66,7 @@ export const useStore = defineStore({
 
         console.log(this.users);
         
-        //this.isAuthenticated = true;
+        this.isAuthenticated = true;
       } catch (error) {
         console.error('Failed to fetch user:', error);
         this.isAuthenticated = false;
@@ -103,7 +74,7 @@ export const useStore = defineStore({
 
     },
 
-    async fetchUsersBY(role: string, token: string){
+    async fetchUsersBY(role, token){
       if (!token) {
         console.error('No token provided');
         return;
@@ -115,6 +86,27 @@ export const useStore = defineStore({
         this.userList = response;
 
         console.log('liste ',this.userList);
+        
+        //this.isAuthenticated = true;
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+        this.isAuthenticated = false;
+      }
+
+    },
+
+    async fetchContract(role, token){
+      if (!token) {
+        console.error('No token provided');
+        return;
+      }
+      try {
+        const response = await getContract(role, token);
+        console.log('storage', response);
+        
+        this.listContract = response;
+
+        console.log('liste ',this.listContract);
         
         //this.isAuthenticated = true;
       } catch (error) {
@@ -135,16 +127,17 @@ export const useStore = defineStore({
         this.userProfile = null;
         localStorage.removeItem("token");
         localStorage.removeItem("role");
+        localStorage.removeItem("id");
       } catch (error) {
         console.error('Failed to logout:', error);
       }
     },
 
-    async addUser(payload: FormData){
+    async addUser(payload){
 
     },
 
-    async fetchUsersByRole(role: string) {
+    async fetchUsersByRole(role) {
       if (!this.token) {
         console.error('No token provided');
         return;

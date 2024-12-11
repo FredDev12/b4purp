@@ -10,14 +10,14 @@
     </aside>
   </template>
   
-  <script lang="ts">
+  <script>
   import { defineComponent, PropType } from 'vue';
   
   export default defineComponent({
     name: 'SidebarComponent',
     props: {
       menuItems: {
-        type: Array as PropType<Array<{ name: string; link: string; active: boolean }>>,
+        type: Array,
         required: true,
       },
     },

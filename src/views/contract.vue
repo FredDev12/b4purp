@@ -5,26 +5,20 @@
   
       <!-- Contenu principal -->
       <main class="table-container">
-        <h1>Liste des Utilisateurs</h1>
-        <button class="add-button" @click="addUser()">Ajouter</button>
+        <h1>Liste des Contract</h1>
+        <button class="add-button" @click="addContract()">Ajouter</button>
         <table v-if="entities.length > 0" class="client-table">
           <thead>
             <tr>
               <th>Nom complet</th>
-              <th>Email</th>
-              <th>Tache</th>
-              <th>Status</th>
-              <th>Rôle</th>
-              <th>Actions</th>
+              <th>Description</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="entity in entities" :key="entity.id">
               <td>{{ entity.name }}</td>
-              <td>{{ entity.email }}</td>
-              <td>{{ entity.task }}</td>
-              <td>{{ entity.status }}</td>
-              <td>{{ entity.role }}</td>
+              <td>{{ entity.description }}</td>
               <td>
                 <button @click="editEntity(entity.id)" class="edit-button">Éditer</button>
                 <button @click="deleteEntity(entity.id)"  class="delete-button">Supprimer</button>
@@ -32,7 +26,7 @@
             </tr>
           </tbody>
         </table>
-        <p v-else>Aucun {{ entityTitle.toLowerCase() }} trouvé <router-link to="/addUser">Ajouter ici</router-link>.</p>
+        <p v-else>Aucun {{ entityTitle.toLowerCase() }} trouvé <router-link to="/addContract">Ajouter ici</router-link>.</p>
       </main>
     </div>
   </template>
@@ -43,7 +37,7 @@
   import SidebarComponent from '../components/SidebarComponent.vue';
   import NavBar from '../components/NavBar.vue';
   import { useRouter } from 'vue-router';
-  import { getUsers } from '../api/serviceAPI';
+  import { getContract } from '../api/serviceAPI';
   import { useStore } from '../store/Storage';
   
   export default defineComponent({
@@ -67,7 +61,7 @@
       const menuItems = ref([
           { name: 'Tableau de Bord', link: '/dashboard', active: false, visibleTo: ['Admin', 'Client', 'Manager', 'Utilisateur'] },
           { name: 'Liste des Utilisateurs', link: '/liste', active: false, visibleTo: ['Admin', 'Client', 'Manager'] },
-          { name: 'Liste des contract', link: '/contract', active: true, visibleTo: ['Admin', 'Client'] },
+          { name: 'Liste des Contract', link: '/contract', active: true, visibleTo: ['Admin', 'Client'] },
       ]);
 
       // Filtrer les éléments du menu en fonction du rôle de l'utilisateur
@@ -78,31 +72,11 @@
   
       onMounted(async () => {
         try {
-          let response;
-          const entityType = role;
-          switch (entityType) {
-              case "Admin":
-              entityTitle.value = "Admin";
-              break;
-              case "Client":
-              entityTitle.value = "Client";
-              break;
-              case "Manager":
-              entityTitle.value = "Manager";
-              break;
-              case "Utilisateur":
-              entityTitle.value = "Utilisateur";
-              break;
-              default:
-              console.warn(`Type d'entité inconnu: ${entityType}`);
-              return;
-          }
-          console.log(entityTitle.value);
-
+          
           // Only call listUsers once, since it is used in every case
           if (token) {                   
           
-          const response = await getUsers(role, token);
+          const response = await getContract(role, token);
           console.log(role);
           
           entities.value = response;
@@ -126,8 +100,8 @@
         console.log("Delete entity with ID:", entityId);
       };
   
-      const addUser = () => {
-        router.push("/addUser");
+      const addContract = () => {
+        router.push("/addContract");
       };
   
       return {
@@ -136,7 +110,7 @@
         menuItems,
         editEntity,
         deleteEntity,
-        addUser,
+        addContract,
         filteredMenuItems,
         role
       };

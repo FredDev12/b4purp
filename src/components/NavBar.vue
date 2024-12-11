@@ -18,9 +18,11 @@
 
         <!-- Dropdown Action Bubble -->
         <div class="action-bubble">
+           <h1 class="welcom" >Bonjour, {{ username }} !</h1>
+        
           <button @click="toggleDropdown" class="action-button">
-          <img src="../assets/user1.png" alt="Profile" class="profile-picture" />
-        </button>
+            <img src="../assets/user1.png" alt="Profile" class="profile-picture" />
+          </button>
           <div v-if="isDropdownOpen" class="dropdown-menu">
             <ul>
               <li><a href="#" @click.prevent="profil">Mon profil</a></li>
@@ -34,20 +36,23 @@
     </div>
   </template>
   
-  <script lang="ts">
+  <script>
    import { defineComponent, PropType } from 'vue';
    import { useRouter } from 'vue-router';
+   import { useStore } from '../store/Storage';
 
   export default defineComponent ({
     name: 'NavbarComponent',
     props: {
         menuItems: {
-        type: Array as PropType<Array<{ name: string; link: string; active: boolean }>>,
+        type: Array,
         required: true,
       },
     },
     setup() {
       const router = useRouter();
+      const store = useStore();
+      const username = store.userProfile ? store.userProfile.name : 'Default Name';
 
       const logout = () => {
         // Suppression du token JWT du stockage local
@@ -62,7 +67,7 @@
       };
 
       return {
-        logout,profil,
+        logout,profil,username
       };
     },
     data() {

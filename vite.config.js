@@ -6,6 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  root: './',
   base: '/app/',
   plugins: [
     vue(),
@@ -32,7 +33,8 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: 'public/index.html'  // Specify the path to your entry file if it's not in the root
-    }
+    },
+    outDir: 'dist', // Ensure this matches the Netlify publish directory
   },
   define: {
     __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,

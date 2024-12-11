@@ -78,6 +78,9 @@ body {
 
 .action-bubble {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .action-button {
@@ -344,6 +347,101 @@ form {
 
 .menu.active {
   transform: translateX(0);
+}
+.welcom{
+  font-size: 20px;        /* Adjust font size as needed */
+  margin: 0;              /* Remove default margin */
+  padding-right: 10px;    /* Space between text and button */
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Couleur d'arrière-plan avec opacité */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px 30px; /* Ajout de padding plus uniforme */
+  border-radius: 12px; /* Coins arrondis */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Effet d'ombre */
+  width: 400px; /* Largeur fixe */
+  max-width: 90%; /* S'adapte à l'écran */
+  text-align: center; /* Centrer le texte */
+}
+
+.modal-content h3 {
+  font-size: 1.5rem; /* Taille du titre */
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Espacement uniforme entre les champs */
+}
+
+.modal-content label {
+  font-size: 1rem; /* Taille des labels */
+  text-align: left;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.modal-content input,
+.modal-content textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ddd; /* Bordure grise */
+  border-radius: 8px; /* Coins arrondis */
+  outline: none;
+  transition: border 0.3s ease; /* Transition sur le focus */
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus {
+  border-color: #007BFF; /* Couleur de focus */
+}
+
+.modal-content textarea {
+  resize: none; /* Désactive le redimensionnement */
+  height: 100px;
+}
+
+.modal-content button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Transition sur le hover */
+}
+
+.modal-content button[type="submit"] {
+  background-color: #007BFF; /* Couleur du bouton principal */
+  color: #fff;
+}
+
+.modal-content button[type="submit"]:hover {
+  background-color: #0056b3; /* Couleur sur hover */
+}
+
+.modal-content button[type="button"] {
+  background-color: #f0f0f0; /* Couleur du bouton annuler */
+  color: #333;
+}
+
+.modal-content button[type="button"]:hover {
+  background-color: #ddd; /* Couleur sur hover */
 }
 
 .profile-picture {

@@ -28,7 +28,7 @@
     </div>
   </template>
   
-  <script lang="ts">
+  <script>
   import { defineComponent, ref, reactive } from "vue";
   import { useRouter } from "vue-router";  
   import { useStore } from '../store/Storage';
@@ -79,13 +79,13 @@
           
         } catch (error) {
           console.error(error);          
-          apiError.value = (error as Error).message || "Role non reconnu.";          
+          apiError.value = (error).message || "Role non reconnu.";          
         } finally {
           loading.value = false;
         }
       };
 
-      const validateEmail = (email: string) => {
+      const validateEmail = (email) => {
             const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             return re.test(email);
         };

@@ -1,72 +1,69 @@
 <template>
-      <NavBar :menuItems="filteredMenuItems" />
+    <NavBar :menuItems="filteredMenuItems" />
 
-  <div class="register">
+    <div class="register">
 
-      <h1>Ajouter un User</h1>
-      <form @submit.prevent="handleRegister">
-          <div class="form-group">
+        <h1>Ajouter un utilisateur</h1>
+        <form @submit.prevent="handleRegister">
+            <div class="form-group">
             <label>Type d'utilisateur:</label>
-              <select v-model="userType">
-                  <option value="">Sélectionnez le type</option>
-                  <option value="Utilisateur">Utilisateur</option>
-                  <option value="Manager">Manager</option>
-              </select>
-
-              <InputField id="name" label="Nom" v-model="form.name" type="text" placeholder="Nom" required />
-
-              <InputField id="email" label="Email" v-model="form.email" type="email" placeholder="Votre email" :error-message="emailError" required />
-
-              <InputField id="password" label="Mot de passe" v-model="form.password" type="password" placeholder="Votre mot de passe" :error-message="passwordError" required />
-              
-              <InputField id="password" label="Confirmez le Mot de passe" v-model="form.confirmPassword" type="password" placeholder="Confirmez le mot de passe" :error-message="passwordError" required />
+            <div v-if="role === 'Client'">
+                <input type="radio" id="user" value="Utilisateur" v-model="userType" @change="updateUserType('Utilisateur')">
+                <label for="user">Utilisateur</label>
+                
+                <input type="radio" id="manager" value="Manager" v-model="userType" @change="updateUserType('Manager')">
+                <label for="manager">Manager</label>
+            </div>
+            <div v-else>
+                <p>{{ userType }}</p> <!-- Display userType directly -->
+            </div>
 
 
+            <InputField id="name" label="Nom" v-model="formdata.name" type="text" placeholder="Nom" required />
 
-              
+            <InputField id="email" label="Email" v-model="formdata.email" type="email" placeholder="Votre email" :error-message="emailError" required />
 
-              <SelectComponent
-                  v-if="userType === 'Utilisateur'"
-                  label="Sélectionnez un Manager"
-                  v-model="form.managerId"
-                  :options="managerOptions"
-                  placeholder="Sélectionnez un Manager" />
-
-              <SelectComponent
-                  v-if="userType === 'Manager'"
-                  label="Sélectionnez un Client"
-                  v-model="form.clientId"
-                  :options="clientOptions"
-                  placeholder="Sélectionnez un Client" />
-
-                  <InputField v-if="userType === 'Utilisateur'" id="task" label="tache" v-model="form.task" type="text" placeholder="Confirmez le mot de passe" :options="managerOptions" :error-message="passwordError" required />
+            <InputField id="password" label="Mot de passe" v-model="formdata.password" type="password" placeholder="Votre mot de passe" :error-message="passwordError" required />
+            
+            <InputField id="confirmpassword" label="Confirmez le Mot de passe" v-model="formdata.confirmPassword" type="password" placeholder="Confirmez le mot de passe" :error-message="passwordError" required />
 
 
-                  <InputField v-if="userType === 'Utilisateur'" id="etat" label="status" v-model="form.etat" type="text" placeholder="Confirmez le mot de passe" :options="managerOptions" :error-message="passwordError" required />
+            <SelectComponent
+                v-if="userType === 'Utilisateur'"
+                label="Sélectionnez un Manager"
+                v-model="formdata.managerId"
+                :options="managerOptions"
+                placeholder="Sélectionnez un Manager" />
 
+            <SelectComponent
+                v-if="userType === 'Manager'"
+                label="Sélectionnez un Client"
+                v-model="formdata.clientId"
+                :options="clientOptions"
+                placeholder="Sélectionnez un Client" />
 
-              
+            <InputField v-if="userType === 'Utilisateur'" id="task" label="tache" v-model="formdata.task" type="text" placeholder="Confirmez le mot de passe" :options="managerOptions" :error-message="passwordError" required />
+            <InputField v-if="userType === 'Utilisateur'" id="etat" label="status" v-model="formdata.etat" type="text" placeholder="Confirmez le mot de passe" :options="managerOptions" :error-message="passwordError" required />
+            <input type="file" @change="onFileChange">
+            </div>
 
-                  <input type="file" @change="onFileChange">
-          </div>
+            <ButtonComponent
+                type="submit"
+                class="btn-primary"
+                :disabled="loading"
+            >
+                <template v-if="loading">Chargement...</template>
+                <template v-else>Ajouter</template>
+            </ButtonComponent>
 
-          <ButtonComponent
-              type="submit"
-              class="btn-primary"
-              :disabled="loading"
-          >
-              <template v-if="loading">Chargement...</template>
-              <template v-else>Ajouter</template>
-          </ButtonComponent>
-
-          <p v-if="apiError" class="error">{{ apiError }}</p>
-      </form>
-      
-  </div>
+            <p v-if="apiError" class="error">{{ apiError }}</p>
+        </form>
+        
+    </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, ref, watch } from 'vue';
+<script>
+import { defineComponent, reactive, ref, watch, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { register } from '../api/serviceAPI';
 import ButtonComponent from '../components/ButtonComponent.vue';
@@ -79,148 +76,160 @@ import { useStore } from '../store/Storage';
 
 
 export default defineComponent({
-  name: "Register",
-  components: {
-      ButtonComponent,
-      InputField,
-      SelectComponent,
-      ImageUpload,
-      NavBar
-  },
-  data() {
-    return {
-      filteredMenuItems: [],// Filtered based on role
-      username: "Invité",
-      role: "User", // Rôle par défaut
-      userRole: 'User'
-              
-    };
-  },
-  
-  setup() {
-      const router = useRouter();
-      const store = useStore();
-      const role = ref(localStorage.getItem("role") || "User");
-      const userType = ref('');
+    name: "Register",
+    components: {
+        ButtonComponent,
+        InputField,
+        SelectComponent,
+        ImageUpload,
+        NavBar
+    },
+ 
+    setup() {
+        const router = useRouter();
+        const store = useStore();
+        const role = ref(localStorage.getItem('role') || "Utilisateur");
+        const token = ref(localStorage.getItem('token'));
+        const userType = ref("Utilisateur");
 
-      const form = reactive({
-          name: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          photo: null as File | null,
-          role: '',
-          managerId: '',
-          clientId: '',
-          utilisateurId: '',
-          task: '',
-          etat: '',
-      });
+        const formdata = reactive({
+            name: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            photo: File | null,
+            role: '',
+            managerId: '',
+            clientId: '',
+            utilisateurId: '',
+            task: '',
+            etat: '',
+        });
 
-      const managerOptions = ref<{ value: string; label: string }[]>([]);
-      const clientOptions = ref<{ value: string; label: string }[]>([]);
-      
+        const managerOptions = ref([]);
+        const clientOptions = ref([]);
+        
 
-      function onFileChange(event: Event) {
-      const target = event.target as HTMLInputElement;
-      if (target.files) {
-        form.photo = target.files[0];
-      }
-    }
-      
+        function onFileChange(event) {
+            const target = event.target ;
+            if (target.files) {
+                formdata.photo = target.files[0];
+            }
+        }
+        
 
-      const emailError = ref("");
-      const passwordError = ref("");
-      const apiError = ref("");
-      const loading = ref(false);  
-      
-      const menuItems = ref([
+        const emailError = ref("");
+        const passwordError = ref("");
+        const apiError = ref("");
+        const loading = ref(false);  
+        
+        const menuItems = ref([
           { name: 'Tableau de Bord', link: '/dashboard', active: false, visibleTo: ['Admin', 'Client', 'Manager', 'Utilisateur'] },
           { name: 'Liste des Utilisateurs', link: '/liste', active: false, visibleTo: ['Admin', 'Client', 'Manager'] },
-          { name: "Mon Profil", link: '/profile', active: true, visibleTo: ['Admin', 'Client', 'Manager', 'Utilisateur'] },
+          { name: 'Liste des contract', link: '/contract', active: true, visibleTo: ['Admin', 'Client'] },
       ]);
 
-      // Filtrer les éléments du menu en fonction du rôle de l'utilisateur
-      const filteredMenuItems = menuItems.value.filter(item => item.visibleTo.includes(role.value));
+        // Filtrer les éléments du menu en fonction du rôle de l'utilisateur
+        const filteredMenuItems = computed(() => menuItems.value.filter(item => item.visibleTo.includes(role.value)));
+   
+        
+        async function fetchManagers() {
+            try {                
+                const users = await store.users; // Assumed asynchronous fetch function
+                
+                
+                if (!users || !Array.isArray(users)) return []; // Ajout d'une vérification pour s'assurer que users est bien un tableau.
+                return users.filter(user => user.role === 'Manager').map(manager => ({ value: manager.id.toString(), label: manager.name }));
+            } catch (error) {
+                console.error('Failed to fetch managers:', error);
+                return [];
+            }
+        };
 
+        async function fetchClients() {
+            try {     
+                const users = await store.users; // Assumed asynchronous fetch function
+                
+                if (!users || !Array.isArray(users)) return []; // Ajout d'une vérification pour s'assurer que users est bien un tableau.
+                return users.filter(user => user.role === 'Client').map(client => ({ value: client.id.toString(), label: client.name }));
+                            
+            } catch (error) {
+                console.error('Failed to fetch clients:', error);
+                return [];
+            }
 
-      const fetchManagers = async () => {
-          try {
-              return store.users!.map(manager => ({ value: manager.id.toString(), label: manager.name }));
-          } catch (error) {
-              console.error('Failed to fetch managers:', error);
-          }
-      };
+        };
 
-      const fetchClients = async () => {
-          try {              
-              return store.users!.map(client => ({ value: client.id.toString(), label: client.name }));
-          } catch (error) {
-              console.error('Failed to fetch clients:', error);
-          }
-      };
-
-      // Watcher pour charger les données appropriées
-      watch(userType, async (newType) => {
-          if (newType === 'user') {
-              managerOptions.value = await fetchManagers() || [];
-          } else if (newType === 'manager') {
-              clientOptions.value = await fetchClients() || [];
-          }
-      });      
-
-      
-      const handleRegister = async () => {
-          
-          console.log(form);
-          
-          
-          loading.value = true;
-          emailError.value = "";
-          passwordError.value = "";
-          apiError.value = "";
-
-          
-          const payload = { ...form, userType: userType.value };
-
-          const data = new FormData();
-      data.append('name', form.name);
-      data.append('email', form.email);
-      data.append('password', form.password);
-      data.append('role', form.role);
-      data.append('managerId', form.managerId);
-      data.append('clientId', form.clientId);
-      data.append('utilisateurId', form.utilisateurId);
-      data.append('task', form.task);
-      data.append('etat', form.etat);
-      if (form.photo) {
-        data.append('photo', form.photo);
-      }
-          try {
-              //const response = await store.addUser(payload);
-              //console.log('Registration successful:', response);
+        
+        onMounted(async () => {
             
-              
-              console.log(form);
-              
-              await register(data);
-              //router.push('/dashboard');
-          } catch (error) {
-            console.error('Registration failed:', error);
-              apiError.value = "Une erreur est survenue lors de l'inscription. Veuillez réessayer.";
-          } finally {
-              loading.value = false;
-          }
-      };
+            if (token.value) {
+                await store.fetchUsers(role.value, token.value);
+            }
+            managerOptions.value = await fetchManagers();
+        
+            clientOptions.value = await fetchClients();
+            
+        });
+
+        console.log("\n\n\n option manager", managerOptions.value);
+        
+        
+        function updateUserType(selectedType) {
+            // Si le type sélectionné est déjà sélectionné, désélectionnez-le
+            
+            userType.value = selectedType;
+            console.log("\n\n valeur", userType.value);
+            
+        }
+      
+        async function handleRegister() {            
+            console.log(formdata);
+            
+            
+            loading.value = true;
+            emailError.value = "";
+            passwordError.value = "";
+            apiError.value = "";
+
+            
+
+            const data = new FormData();
+            data.append('name', formdata.name);
+            data.append('email', formdata.email);
+            data.append('password', formdata.password);
+            data.append('role', userType.value);
+            data.append('managerId', formdata.managerId);
+            data.append('clientId', formdata.clientId);
+            data.append('utilisateurId', formdata.utilisateurId);
+            data.append('task', formdata.task);
+            data.append('etat', formdata.etat);
+            if (formdata.photo) {
+                data.append('photo', formdata.photo);
+            }
+
+            try {
+                
+                console.log(formdata);
+                await register(data);
+                router.push({ name: 'liste' });
+            } catch (error) {
+                console.error('Registration failed:', error);
+                apiError.value = "Une erreur est survenue lors de l'inscription. Veuillez réessayer.";
+            } finally {
+                loading.value = false;
+            }
+        };
 
       
-      return {
-          handleRegister, form, filteredMenuItems,
-          emailError,  onFileChange, role,
-          passwordError, apiError, userType,
-          loading, managerOptions, clientOptions,
-          
-      };
-  },
+        return {
+            handleRegister, formdata, filteredMenuItems,
+            emailError,  onFileChange, role,
+            passwordError, apiError, userType,
+            loading, managerOptions, clientOptions,
+            updateUserType
+            
+        };
+    },
 });
 </script>

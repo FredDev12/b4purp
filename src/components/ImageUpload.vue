@@ -7,15 +7,15 @@
     </div>
   </template>
   
-  <script lang="ts">
+  <script>
   import { defineComponent, ref, computed } from 'vue';
   
   export default defineComponent({
     name: 'ImageUpload',
     emits: ['update:file'],
     setup(_, { emit }) {
-        const handleFileUpload = (event: Event) => {
-            const target = event.target as HTMLInputElement;
+        const handleFileUpload = (event) => {
+            const target = event.target;
             const files = target.files;
             const file = files && files[0];
             if (file) {
